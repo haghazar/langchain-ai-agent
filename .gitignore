@@ -218,3 +218,44 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# =========================
+# HaykAiAgent homework files
+# =========================
+
+# API keys and secrets
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+.venv/
+venv/
+
+# Private local documents
+data/
+!data/.gitkeep
+
+# ChromaDB main vector store
+chromadb_store/
+
+# Chunking experiment vector stores
+lab_small/
+lab_large/
+lab_no_overlap/
+lab_*/
+
+# Chroma / local database files
+*.sqlite
+*.sqlite3
+*.db
+chroma.sqlite3
+
+# Local experiment outputs / temporary files
+*.log
+tmp/
+temp/
+
+# OS files
+.DS_Store
+Thumbs.db
