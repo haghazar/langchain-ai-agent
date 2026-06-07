@@ -87,16 +87,18 @@ def create_rag_chain():
 
     prompt = ChatPromptTemplate.from_template(
         """
-You are a careful RAG assistant.
+You are a strict retrieval-only assistant.
 
-Use ONLY the context below to answer the question.
+You must answer using ONLY the provided context.
 
-If the answer is not clearly present in the context, answer exactly:
+Important rules:
+1. If the context does not contain the answer, reply exactly:
 "I don't have information about that."
-
-Do not use your general knowledge.
-Do not guess.
-Do not add information that is not in the context.
+2. Do not use outside knowledge.
+3. Do not answer from memory.
+4. Do not infer facts that are not explicitly supported by the context.
+5. If the question is unrelated to asset transfer, chaincode, private data collections, ownership, endorsement, buyer, seller, regulator, or ChromaDB context, reply exactly:
+"I don't have information about that."
 
 Context:
 {context}
@@ -104,7 +106,7 @@ Context:
 Question:
 {question}
 
-Answer:
+Final answer:
 """
     )
 
