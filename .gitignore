@@ -233,7 +233,7 @@ __marimo__/
 venv/
 
 # Private local documents
-data/
+data/*
 !data/.gitkeep
 
 # ChromaDB main vector store

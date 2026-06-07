@@ -1,13 +1,15 @@
 from pathlib import Path
 
 from langchain_chroma import Chroma
-from langchain_google_genai import ChatGoogleGenerativeAI
+#from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
 from config import Config
+from langchain_openai import ChatOpenAI
 
 
 PERSIST_DIR = Path("chromadb_store")
@@ -110,9 +112,14 @@ Final answer:
 """
     )
 
-    llm = ChatGoogleGenerativeAI(
+    """llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
         temperature=0
+    )"""
+    
+    llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0
     )
 
     chain = (
