@@ -33,17 +33,17 @@ def load_documents(data_dir: Path = DATA_DIR):
         if not file_path.is_file():
             continue
 
-        suffix = file_path.suffix.lower()
+        file_extension = file_path.suffix.lower()
 
-        if suffix == ".txt":
+        if file_extension == ".txt":
             loader = TextLoader(str(file_path), encoding="utf-8")
             documents.extend(loader.load())
 
-        elif suffix == ".md":
+        elif file_extension == ".md":
             loader = TextLoader(str(file_path), encoding="utf-8")
             documents.extend(loader.load())
 
-        elif suffix == ".pdf":
+        elif file_extension == ".pdf":
             loader = PyPDFLoader(str(file_path))
             documents.extend(loader.load())
 
@@ -56,25 +56,30 @@ def load_documents(data_dir: Path = DATA_DIR):
     return documents
 
 
-def build_store(splitter, persist_dir: str | Path = DEFAULT_PERSIST_DIR):
+def build_store(splitter, persist_dir: str | Path = DEFAULT_PERSIST_DIR) -> int:
     """
     Build a ChromaDB vector store from documents.
 
-    This function:
-    1. loads documents from data/;
-    2. splits them into chunks using the provided splitter;
-    3. embeds chunks with GoogleGenerativeAIEmbeddings;
-    4. stores them in ChromaDB.
+    This function is reusable for Homework 2.
 
-    To avoid duplicate chunks on re-run, the old store folder is deleted first.
+    Parameters:
+    splitter:
+        Any LangChain text splitter, for example:
+        RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+
+    persist_dir:
+        Target folder where ChromaDB store will be saved.
+
+    Returns:
+        Number of chunks created.
     """
 
+    # Load and validate API keys from .env
     Config()
 
     persist_dir = Path(persist_dir)
 
     documents = load_documents(DATA_DIR)
-
     print(f"Loaded documents: {len(documents)}")
 
     chunks = splitter.split_documents(documents)
@@ -84,6 +89,9 @@ def build_store(splitter, persist_dir: str | Path = DEFAULT_PERSIST_DIR):
 
     print(f"Chunk count: {len(chunks)}")
 
+    # Important:
+    # Remove existing store before rebuilding.
+    # This prevents duplicate chunks when python ingest.py is run again.
     if persist_dir.exists():
         print(f"Removing existing store: {persist_dir}")
         shutil.rmtree(persist_dir)
@@ -106,12 +114,12 @@ def build_store(splitter, persist_dir: str | Path = DEFAULT_PERSIST_DIR):
 
 def main():
     """
-    Default ingest command.
+    Default Homework 1 ingest behavior.
 
     Running:
         python ingest.py
 
-    builds the original Homework 1 store:
+    still builds:
         chunk_size=500
         chunk_overlap=50
         persist_dir=chromadb_store/
