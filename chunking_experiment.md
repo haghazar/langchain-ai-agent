@@ -2,25 +2,56 @@
 
 ## 1. Frozen Query Set
 
-### Pair 1
-- A:
-- B:
+These 10 queries are frozen for the whole chunking experiment.  
+Each pair asks about the same fact in two different ways.
 
-### Pair 2
-- A:
-- B:
+### Pair 1 — Public asset tracking
 
-### Pair 3
-- A:
-- B:
+- A: How is an asset tracked in public chaincode state?
+- B: What public identifier is used to record the asset?
 
-### Pair 4
-- A:
-- B:
+Expected answer:
+An asset is tracked by a UUID key in public chaincode state, and only ownership is recorded publicly.
 
-### Pair 5
-- A:
-- B:
+---
+
+### Pair 2 — Transfer endorsement
+
+- A: Which organizations must endorse any transfer requests?
+- B: Who needs to approve the asset transfer before it is accepted?
+
+Expected answer:
+A peer from the owner’s organization and a regulator’s organization must endorse transfer requests.
+
+---
+
+### Pair 3 — Seller proof of ownership
+
+- A: How does the seller provide proof of ownership to the buyer?
+- B: How can the buyer confirm that the seller really owns the asset?
+
+Expected answer:
+The seller provides proof by passing private details out of band or by giving the buyer credentials to query the private data on their node or the regulator’s node.
+
+---
+
+### Pair 4 — Buyer bid details
+
+- A: Where does the buyer record their bid details?
+- B: Where is the buyer’s offer information stored privately?
+
+Expected answer:
+The buyer records bid details in their own private data collection.
+
+---
+
+### Pair 5 — Chaincode verification before transfer
+
+- A: What does the chaincode verify before transferring the asset?
+- B: What checks are performed before ownership is moved to the buyer?
+
+Expected answer:
+The chaincode verifies that the submitting client is the owner, checks the private details against the hash in the seller’s collection, and checks the bid details against the hash in the buyer’s collection.
 
 ---
 
