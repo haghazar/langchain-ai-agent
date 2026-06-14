@@ -1,15 +1,12 @@
 from pathlib import Path
 
 from langchain_chroma import Chroma
-#from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 
 from config import Config
-from langchain_openai import ChatOpenAI
 
 
 PERSIST_DIR = Path("chromadb_store")
@@ -74,18 +71,10 @@ def create_retriever():
     return retriever
 
 
-def create_rag_chain():
+def create_prompt():
     """
-    Create a RAG chain using LCEL.
-
-    The chain:
-    1. retrieves relevant context from ChromaDB;
-    2. inserts context and question into the prompt;
-    3. sends the prompt to Gemini;
-    4. returns a plain string answer.
+    Create the RAG prompt with a strict hallucination guard.
     """
-
-    retriever = create_retriever()
 
     prompt = ChatPromptTemplate.from_template(
         """
@@ -112,49 +101,100 @@ Final answer:
 """
     )
 
-    """llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        temperature=0
-    )"""
-    
+    return prompt
+
+
+def create_llm():
+    """
+    Create the chat model used to generate final answers.
+
+    gpt-4o-mini is used because it worked successfully for the final RAG check.
+    """
+
+    Config()
+
     llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0
+        model="gpt-4o-mini",
+        temperature=0
     )
 
-    chain = (
-        {
-            "context": retriever | format_documents,
-            "question": RunnablePassthrough()
-        }
-        | prompt
-        | llm
-        | StrOutputParser()
-    )
+    return llm
+
+
+def create_answer_chain():
+    """
+    Create the answer-generation chain.
+
+    This chain expects a dictionary with:
+    - context
+    - question
+
+    It returns a plain string answer.
+    """
+
+    prompt = create_prompt()
+    llm = create_llm()
+
+    chain = prompt | llm | StrOutputParser()
 
     return chain
 
 
-def ask_question(chain, question):
+def answer_question(question, retriever=None, answer_chain=None):
     """
-    Ask one question and print the answer.
+    Answer one question and return both the answer and the retrieved context.
+
+    This function is required for LLM-as-Judge evaluation.
+
+    Returns:
+        answer: str
+        context: str
+    """
+
+    if retriever is None:
+        retriever = create_retriever()
+
+    if answer_chain is None:
+        answer_chain = create_answer_chain()
+
+    retrieved_documents = retriever.invoke(question)
+    context = format_documents(retrieved_documents)
+
+    answer = answer_chain.invoke(
+        {
+            "context": context,
+            "question": question
+        }
+    )
+
+    return answer, context
+
+
+def ask_question(question, retriever=None, answer_chain=None):
+    """
+    Ask one question, print the answer, and return both answer and context.
     """
 
     print("=" * 80)
     print(f"Question: {question}")
     print("-" * 80)
 
-    answer = chain.invoke(question)
+    answer, context = answer_question(
+        question=question,
+        retriever=retriever,
+        answer_chain=answer_chain
+    )
 
     print(f"Answer: {answer}")
     print("=" * 80)
     print()
 
-    return answer
+    return answer, context
 
 
 def main():
-    chain = create_rag_chain()
+    retriever = create_retriever()
+    answer_chain = create_answer_chain()
 
     questions = [
         "How is an asset tracked in public chaincode state?",
@@ -164,7 +204,11 @@ def main():
     ]
 
     for question in questions:
-        ask_question(chain, question)
+        ask_question(
+            question=question,
+            retriever=retriever,
+            answer_chain=answer_chain
+        )
 
 
 if __name__ == "__main__":
