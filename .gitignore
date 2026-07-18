@@ -259,3 +259,8 @@ temp/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Week 5 Gmail / Email Agent secrets and local memory
+credentials.json
+token.json
+email_memory_store.json
